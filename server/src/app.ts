@@ -25,6 +25,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/quizzes", quizzRouter);
 app.use("/api/dashboard", dashboardRouter);
 
+app.get("/", (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "QuizTrack API is running",
+  });
+});
+
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
