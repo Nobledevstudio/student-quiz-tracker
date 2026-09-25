@@ -4,29 +4,37 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { useDashboardStats } from "../features/dashboard/components/useDashboardStats";
+
+import DashboardStatCard from "../features/dashboard/components/DashboardStatCard";
+import { useDashboardStats } from "@/features/dashboard/hook/useDashboardStats";
+import LoadingState from "@/components/common/LoadingState";
+import ErrorState from "@/components/common/ErrorState";
 
 
 const DashboardPage = () => {
-  const { data, isLoading, isError } = useDashboardStats();
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+  } = useDashboardStats();
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <p className="text-sm text-slate-500">
-          Loading dashboard...
-        </p>
-      </div>
+      <LoadingState
+        title="Loading dashboard"
+        description="Fetching your latest quiz statistics..."
+      />
     );
   }
 
   if (isError) {
     return (
-      <div className="p-6">
-        <p className="text-sm text-red-600">
-          Failed to load dashboard statistics.
-        </p>
-      </div>
+      <ErrorState
+        title="Unable to load dashboard"
+        description="We couldn't fetch your dashboard statistics. Please try again."
+        onRetry={() => refetch()}
+      />
     );
   }
 
@@ -55,69 +63,54 @@ const DashboardPage = () => {
 
   return (
     <div className="space-y-8 p-6">
+      {/* Page heading */}
       <div>
-        <p className="text-sm font-medium text-sky-600">
+        <p className="text-sm font-medium text-primary">
           QuizTrack
         </p>
 
-        <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground">
           Good morning 👋
         </h1>
 
-        <p className="mt-2 text-slate-500">
+        <p className="mt-2 text-muted-foreground">
           Create, practice and track your quiz progress.
         </p>
       </div>
 
+      {/* Dashboard statistics */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-
-          return (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">
-                    {stat.label}
-                  </p>
-
-                  <p className="mt-2 text-3xl font-bold text-slate-900">
-                    {stat.value}
-                  </p>
-                </div>
-
-                <div className="rounded-xl bg-sky-50 p-3">
-                  <Icon className="h-5 w-5 text-sky-600" />
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {stats.map((stat) => (
+          <DashboardStatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            icon={stat.icon}
+          />
+        ))}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between">
+      {/* Attempts overview */}
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <p className="text-sm font-medium text-muted-foreground">
               Attempts this month
-            </h2>
+            </p>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+              {data?.totalAttempts ?? 0}
+            </p>
+
+            <p className="mt-1 text-xs text-muted-foreground">
               Compared with the previous month
             </p>
           </div>
 
-          <div className="text-right">
-            <p className="text-2xl font-bold text-slate-900">
-              {data?.totalAttempts ?? 0}
-            </p>
-
-            <p className="text-sm text-slate-500">
-              {data?.attemptsChangePercent ?? 0}% change
-            </p>
+          <div className="rounded-lg bg-primary/10 px-2.5 py-1">
+            <span className="text-xs font-semibold text-primary">
+              {data?.attemptsChangePercent ?? 0}%
+            </span>
           </div>
         </div>
       </div>
